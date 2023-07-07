@@ -9,6 +9,7 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.Card
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -16,12 +17,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.hk.curiousui.R
+import kotlinx.coroutines.delay
 
 
 /**
  * TODO:
 DONE * 1. Make it take in a list of drawable resources, or provide a composable for a given int? (Int) -> @Composable
- * 2. Make it automatically slide every couple of seconds
+DONE * 2. Make it automatically slide every couple of seconds (scrolling from last page to first page has undesirable animation (backward scroll). Need to work on this!)
  * 3. Add circles beneath which indicate the current ad position
  * 4. Make circles clickable which causes the ad to swipe to that position
  * 5. When user is pressing on item, pause number 2.
@@ -36,6 +38,13 @@ fun FoundationBanner(
     bannerHeight: Dp = DEFAULT_BANNER_HEIGHT,
 ) {
     val pagerState = rememberPagerState(0)
+
+    LaunchedEffect(key1 = Unit, block = {
+        while (true) {
+            delay(2000)
+            pagerState.animateScrollToPage((pagerState.currentPage + 1) % drawableResources.size)
+        }
+    })
 
     Card(
         modifier = Modifier
