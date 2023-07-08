@@ -3,6 +3,7 @@
 package com.hk.curiousui.ui
 
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -13,10 +14,12 @@ import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.interaction.collectIsDraggedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -24,11 +27,14 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Card
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -41,24 +47,12 @@ import com.hk.curiousui.R
 import kotlinx.coroutines.delay
 
 
-/**
- * TODO:
-DONE * 1. Make it take in a list of drawable resources, or provide a composable for a given int? (Int) -> @Composable
-DONE * 2. Make it automatically slide every couple of seconds (scrolling from last page to first page has undesirable animation (backward scroll). Need to work on this!)
-DONE * 3. Add circles beneath which indicate the current ad position
-REJECTED * 4. Make circles clickable which causes the ad to swipe to that position
-DONE * 5. When user is pressing on item, pause number 2. Animation stops once user has pressed on to an item.
- * 6. Make 2 types of indicators, circular and text, but position them differently.
-DONE * 7. Add click event for when a user clicks on a banner.
- *
- */
-
-
 @Composable
 fun FoundationBanner(
     drawableResources: List<Int>,
     bannerWidth: Dp = Dp.Unspecified,
     bannerHeight: Dp = DEFAULT_BANNER_HEIGHT,
+    bannerIndicatorType: BannerIndicatorType = BannerIndicatorType.CIRCLE,
     onPageClicked: (Int) -> Unit = {},
 ) {
     val pagerState = rememberPagerState(0)
@@ -81,33 +75,45 @@ fun FoundationBanner(
         modifier = Modifier
             .padding(horizontal = 24.dp)
     ) {
-        HorizontalPager(
+        Box(
             modifier = Modifier
                 .width(bannerWidth)
-                .height(bannerHeight),
-            state = pagerState,
-            pageCount = drawableResources.size,
-            beyondBoundsPageCount = 1,
-        ) { page ->
-            Image(
-                painter = painterResource(id = drawableResources[page]),
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.clickable(interactionSource, null) {
-                    onPageClicked(page)
-                }
+                .height(bannerHeight)
+        ) {
+            HorizontalPager(
+                state = pagerState,
+                pageCount = drawableResources.size,
+                beyondBoundsPageCount = 1,
+            ) { page ->
+                Image(
+                    painter = painterResource(id = drawableResources[page]),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.clickable(interactionSource, null) {
+                        onPageClicked(page)
+                    }
+                )
+            }
+
+            if (bannerIndicatorType == BannerIndicatorType.TEXT) TextBannerIndicator(
+                pagerState.currentPage,
+                drawableResources.size
             )
         }
 
-        BannerIndicator(pagerState.currentPage, drawableResources.size)
+        if (bannerIndicatorType == BannerIndicatorType.CIRCLE) CircleBannerIndicator(
+            pagerState.currentPage,
+            drawableResources.size
+        )
     }
 }
 
+enum class BannerIndicatorType {
+    CIRCLE, TEXT
+}
+
 @Composable
-private fun BannerIndicator(
-    currentIndex: Int,
-    itemCount: Int,
-) {
+private fun CircleBannerIndicator(currentIndex: Int, itemCount: Int) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -131,10 +137,20 @@ private fun BannerIndicator(
     }
 }
 
-@Preview
 @Composable
-fun BannerIndicatorPreview() {
-    BannerIndicator(3, 10)
+private fun BoxScope.TextBannerIndicator(currentIndex: Int, itemCount: Int) {
+    Row(
+        modifier = Modifier
+            .offset(x = (-8).dp, y = (-8).dp)
+            .clip(CircleShape)
+            .align(Alignment.BottomEnd)
+            .background(Color.White)
+            .border(BorderStroke(1.dp, Color.Black), shape = CircleShape)
+            .padding(horizontal = 8.dp, vertical = 4.dp),
+        horizontalArrangement = Arrangement.Center
+    ) {
+        Text(text = "${currentIndex + 1} / $itemCount", style = MaterialTheme.typography.labelSmall)
+    }
 }
 
 @Preview(name = "Light mode")
