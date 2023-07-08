@@ -7,6 +7,9 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.interaction.collectIsDraggedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -23,7 +26,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Card
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -44,7 +49,7 @@ DONE * 3. Add circles beneath which indicate the current ad position
 REJECTED * 4. Make circles clickable which causes the ad to swipe to that position
 DONE * 5. When user is pressing on item, pause number 2. Animation stops once user has pressed on to an item.
  * 6. Make 2 types of indicators, circular and text, but position them differently.
- * 7. Add click event for when a user clicks on a banner.
+DONE * 7. Add click event for when a user clicks on a banner.
  *
  */
 
@@ -54,12 +59,16 @@ fun FoundationBanner(
     drawableResources: List<Int>,
     bannerWidth: Dp = Dp.Unspecified,
     bannerHeight: Dp = DEFAULT_BANNER_HEIGHT,
+    onPageClicked: (Int) -> Unit = {},
 ) {
     val pagerState = rememberPagerState(0)
-    val isDragged by pagerState.interactionSource.collectIsDraggedAsState()
+    val pagerIsDragged by pagerState.interactionSource.collectIsDraggedAsState()
 
-    LaunchedEffect(key1 = isDragged) {
-        if (!isDragged) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val interaction by interactionSource.interactions.collectAsState(initial = null)
+
+    LaunchedEffect(key1 = interaction, key2 = pagerIsDragged) {
+        if (!pagerIsDragged && interaction !is PressInteraction.Press) {
             delay(2000)
             while (true) {
                 delay(2000)
@@ -83,7 +92,10 @@ fun FoundationBanner(
             Image(
                 painter = painterResource(id = drawableResources[page]),
                 contentDescription = null,
-                contentScale = ContentScale.Crop
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.clickable(interactionSource, null) {
+                    onPageClicked(page)
+                }
             )
         }
 
