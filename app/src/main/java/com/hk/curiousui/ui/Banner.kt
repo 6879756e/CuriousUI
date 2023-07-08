@@ -50,6 +50,7 @@ import kotlinx.coroutines.delay
 @Composable
 fun FoundationBanner(
     drawableResources: List<Int>,
+    modifier: Modifier = Modifier,
     bannerWidth: Dp = Dp.Unspecified,
     bannerHeight: Dp = DEFAULT_BANNER_HEIGHT,
     bannerIndicatorType: BannerIndicatorType = BannerIndicatorType.CIRCLE,
@@ -71,10 +72,7 @@ fun FoundationBanner(
         }
     }
 
-    Card(
-        modifier = Modifier
-            .padding(horizontal = 24.dp)
-    ) {
+    Card(modifier = modifier) {
         Box(
             modifier = Modifier
                 .width(bannerWidth)
@@ -113,9 +111,13 @@ enum class BannerIndicatorType {
 }
 
 @Composable
-private fun CircleBannerIndicator(currentIndex: Int, itemCount: Int) {
+private fun CircleBannerIndicator(
+    currentIndex: Int,
+    itemCount: Int,
+    modifier: Modifier = Modifier,
+) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp),
         horizontalArrangement = Arrangement.Center
@@ -138,9 +140,13 @@ private fun CircleBannerIndicator(currentIndex: Int, itemCount: Int) {
 }
 
 @Composable
-private fun BoxScope.TextBannerIndicator(currentIndex: Int, itemCount: Int) {
+private fun BoxScope.TextBannerIndicator(
+    currentIndex: Int,
+    itemCount: Int,
+    modifier: Modifier = Modifier
+) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .offset(x = (-8).dp, y = (-8).dp)
             .clip(CircleShape)
             .align(Alignment.BottomEnd)
