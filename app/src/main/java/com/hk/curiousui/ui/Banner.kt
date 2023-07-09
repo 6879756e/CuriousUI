@@ -15,6 +15,8 @@ import androidx.compose.foundation.interaction.collectIsDraggedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.BoxWithConstraintsScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -42,6 +44,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.hk.curiousui.R
+import com.hk.curiousui.ui.util.converter.toPx
 import kotlinx.coroutines.delay
 
 
@@ -49,7 +52,7 @@ import kotlinx.coroutines.delay
 fun FoundationBanner(
     drawableResources: List<Int>,
     modifier: Modifier = Modifier,
-    bannerIndicatorType: BannerIndicatorType = BannerIndicatorType.CIRCLE,
+    bannerIndicatorType: BannerIndicatorType = BannerIndicatorType.AUTO,
     onPageClicked: (Int) -> Unit = {},
 ) {
     val pagerState = rememberPagerState(0)
@@ -68,38 +71,56 @@ fun FoundationBanner(
         }
     }
 
-    Card(modifier = modifier) {
-        Box(modifier = Modifier.weight(1f)) {
-            HorizontalPager(
-                state = pagerState,
-                pageCount = drawableResources.size,
-                beyondBoundsPageCount = 1,
-            ) { page ->
-                Image(
-                    painter = painterResource(id = drawableResources[page]),
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.clickable(interactionSource, null) {
-                        onPageClicked(page)
-                    }
-                )
-            }
-
-            if (bannerIndicatorType == BannerIndicatorType.TEXT) TextBannerIndicator(
-                pagerState.currentPage,
-                drawableResources.size
-            )
+    BoxWithConstraints(modifier = modifier) {
+        val indicatorType = if (bannerIndicatorType == BannerIndicatorType.AUTO) {
+            getIndicatorType(drawableResources)
+        } else {
+            bannerIndicatorType
         }
 
-        if (bannerIndicatorType == BannerIndicatorType.CIRCLE) CircleBannerIndicator(
-            pagerState.currentPage,
-            drawableResources.size
-        )
+        Card {
+            Box(modifier = Modifier.weight(1f)) {
+                HorizontalPager(
+                    state = pagerState,
+                    pageCount = drawableResources.size,
+                    beyondBoundsPageCount = 1,
+                ) { page ->
+                    Image(painter = painterResource(id = drawableResources[page]),
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.clickable(interactionSource, null) {
+                            onPageClicked(page)
+                        })
+                }
+                if (indicatorType == BannerIndicatorType.TEXT) {
+                    this@BoxWithConstraints.TextBannerIndicator(
+                        pagerState.currentPage,
+                        drawableResources.size
+                    )
+                }
+            }
+            if (indicatorType == BannerIndicatorType.CIRCLE) {
+                CircleBannerIndicator(pagerState.currentPage, drawableResources.size)
+            }
+        }
+    }
+}
+
+@Composable
+private fun BoxWithConstraintsScope.getIndicatorType(
+    drawableResources: List<Int>
+): BannerIndicatorType {
+    val circleIndicatorMinWidth = (drawableResources.size * 12 + 4).dp.toPx()
+
+    return if (constraints.maxWidth > circleIndicatorMinWidth) {
+        BannerIndicatorType.CIRCLE
+    } else {
+        BannerIndicatorType.TEXT
     }
 }
 
 enum class BannerIndicatorType {
-    CIRCLE, TEXT
+    CIRCLE, TEXT, AUTO
 }
 
 @Composable
@@ -111,7 +132,8 @@ private fun CircleBannerIndicator(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp),
+            .padding(vertical = 4.dp)
+            .padding(start = 4.dp),
         horizontalArrangement = Arrangement.Center
     ) {
         repeat(itemCount) {
