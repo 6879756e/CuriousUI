@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -41,7 +40,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.hk.curiousui.R
 import kotlinx.coroutines.delay
@@ -51,8 +49,6 @@ import kotlinx.coroutines.delay
 fun FoundationBanner(
     drawableResources: List<Int>,
     modifier: Modifier = Modifier,
-    bannerWidth: Dp = Dp.Unspecified,
-    bannerHeight: Dp = DEFAULT_BANNER_HEIGHT,
     bannerIndicatorType: BannerIndicatorType = BannerIndicatorType.CIRCLE,
     onPageClicked: (Int) -> Unit = {},
 ) {
@@ -73,11 +69,7 @@ fun FoundationBanner(
     }
 
     Card(modifier = modifier) {
-        Box(
-            modifier = Modifier
-                .width(bannerWidth)
-                .height(bannerHeight)
-        ) {
+        Box(modifier = Modifier.weight(1f)) {
             HorizontalPager(
                 state = pagerState,
                 pageCount = drawableResources.size,
@@ -175,5 +167,3 @@ fun FoundationBannerPreview() {
 
     FoundationBanner(drawableResources)
 }
-
-private val DEFAULT_BANNER_HEIGHT = 150.dp
