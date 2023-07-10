@@ -53,6 +53,7 @@ fun FoundationBanner(
     drawableResources: List<Int>,
     modifier: Modifier = Modifier,
     bannerIndicatorType: BannerIndicatorType = BannerIndicatorType.AUTO,
+    contentScale: ContentScale = ContentScale.Crop,
     onPageClicked: (Int) -> Unit = {},
 ) {
     val pagerState = rememberPagerState(0)
@@ -87,7 +88,7 @@ fun FoundationBanner(
                 ) { page ->
                     Image(painter = painterResource(id = drawableResources[page]),
                         contentDescription = null,
-                        contentScale = ContentScale.Crop,
+                        contentScale = contentScale,
                         modifier = Modifier.clickable(interactionSource, null) {
                             onPageClicked(page)
                         })
