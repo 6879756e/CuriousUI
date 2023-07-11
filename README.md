@@ -11,3 +11,11 @@ case automatic scrolling resumes after 3 seconds.
 and the 'text' style used when there is insufficient space to accommodate all circles.
 
 <img src="./readme/banner.gif" width="540" alt="Recording of banner component." />
+
+## DataUsageArc
+This component was created using a `Canvas`. It was inspired by the UI present in the KT app.
+
+
+|           DataUsageArc           |      Inspiration (KT)      |
+|:--------------------------------:|:--------------------------:|
+| ![](./readme/data_usage_arc.gif) | ![](./readme/kt_data.jpeg) |
